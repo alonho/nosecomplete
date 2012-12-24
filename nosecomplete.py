@@ -44,18 +44,18 @@ def _complete(thing):
         tests = list(get_module_tests(module))
         if '.' in test_part:
             # complete a method
-            return _get_prefixed(strings=tests, prefix=test_part)
+            return [module + ':' + i for i in _get_prefixed(strings=tests, prefix=test_part)]
         funcs = [test for test in tests if test.count('.') == 0]
         classes = [test.split('.')[0] for test in tests if '.' in test]
         if test_part in classes:
             # indicate a method should be completed
-            return [test_part + '.']
-        return _get_prefixed(strings=funcs + classes, prefix=test_part)
+            return [thing + '.']
+        return [module + ':' + i for i in _get_prefixed(strings=funcs + classes, prefix=test_part)]
     if os.path.isdir(thing):
         # complete directory contents
         if thing != '.' and not thing.endswith('/'):
             return [thing + '/']
-        return os.listdir(thing)
+        return [os.path.join(thing, i) for i in os.listdir(thing)]
     if os.path.exists(thing):
         # add a colon to indicate search for specific class/func
         return [thing + ':']
@@ -64,7 +64,11 @@ def _complete(thing):
     return _get_py_or_dirs(directory, file_part)
 
 def complete(thing):
-    for option in _complete(thing):
+    opts = list(_complete(thing))
+    if len(opts) == 1:
+        print opts[0]
+        return
+    for option in opts:
         print option,
     
 def main():
