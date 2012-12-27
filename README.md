@@ -3,6 +3,7 @@ Nosecomplete
 ============
 
 Nosecomplete is a nose plugin for completing test modules/classes/methods/functions from the command line.
+
 Nosecomplete is composed of two pieces: a script called 'nosecomplete' and a shell completion function that calls the script.
 
 An example using tab completion:
