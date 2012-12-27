@@ -3,8 +3,9 @@ Nosecomplete
 ============
 
 Nosecomplete is a nose plugin for completing test modules/classes/methods/functions from the command line.
+Nosecomplete is composed of two pieces: a script called 'nosecomplete' and a shell completion function that calls the script.
 
-Here's an Example:
+An example using tab completion:
 
     % nosetests utils/test_decorators.py:Test<TAB>
     utils/test_decorators.py:TestCache
@@ -13,6 +14,19 @@ Here's an Example:
     % nosetests utils/test_decorators.py:TestRetry.<TAB>
     utils/test_decorators.py:TestRetry.test_eventual_success
 	utils/test_decorators.py:TestRetry.test_expires_raises
+
+An example calling nosecomplete directly:
+
+	% nosecomplete utils/test_decorators.py:Test<ENTER>
+    utils/test_decorators.py:TestCache
+	utils/test_decorators.py:TestRetry
+
+Installation
+============
+
+Install nosecomplete from pypi:
+
+	pip install nosecomplete
 
 bash
 ----

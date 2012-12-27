@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(name='nosecomplete',
       version='0.0.1',
-      description='',
+      description='nosecomplete is a nose plugin used for completing test names from the command line',
       author='Alon Horev',
       author_email='alon@horev.net',
       url='https://github.com/alonho/nosecomplete',

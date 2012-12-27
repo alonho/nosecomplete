@@ -67,7 +67,7 @@ def _complete(thing):
 
 def complete(thing):
     for option in _complete(thing):
-        print thing + option,
+        sys.stdout.write(thing + option) # avoid print for python 3
 
 def main():
     if len(sys.argv) == 1:
