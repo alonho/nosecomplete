@@ -28,6 +28,8 @@ Installation
 Install nosecomplete from pypi:
 
 	pip install nosecomplete
+	
+Follow @alonhorev on twitter for updates.
 
 bash
 ----
