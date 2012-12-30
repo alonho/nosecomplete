@@ -31,13 +31,17 @@ def get_module_tests(module):
 def _get_prefixed(strings, prefix):
     for string in strings:
         if string.startswith(prefix):
-            yield string.replace(prefix, '')
+            yield string.replace(prefix, '', 1)
 
 def _get_py_or_dirs(directory, prefix):
     for entry in os.listdir(directory or '.'):
         path = os.path.join(directory, entry)
-        if entry.startswith(prefix) and (os.path.isdir(path) or entry.endswith('.py')):
-            yield entry.replace(prefix, '')
+        if entry.startswith(prefix):
+            leftover = entry.replace(prefix, '', 1)
+            if os.path.isdir(path):
+                yield leftover + '/'
+            elif leftover.endswith('.py'):
+                yield leftover + ':'
 
 def _complete(thing):
     if ':' in thing:
@@ -57,7 +61,7 @@ def _complete(thing):
         # complete directory contents
         if thing != '.' and not thing.endswith('/'):
             return ['/']
-        return os.listdir(thing)
+        return _get_py_or_dirs(thing, '')
     if os.path.exists(thing):
         # add a colon to indicate search for specific class/func
         return [':']
