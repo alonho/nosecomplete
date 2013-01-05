@@ -58,7 +58,15 @@ Add the following snippet to your .bashrc:
 
     _nosetests()
     {
-        cur="${COMP_WORDS[COMP_CWORD]}"
+        local i=$COMP_CWORD
+        while [ $i -ge 0 ]; do
+            [ ${COMP_WORDS[$((i--))]} == ":" ] && break
+        done
+        if [ $i -le 0 ]; then
+            cur=${COMP_WORDS[COMP_CWORD]}
+        else
+            cur=$(printf "%s" ${COMP_WORDS[@]:$i})
+        fi
         COMPREPLY=(`nosecomplete ${cur} 2>/dev/null`)
         __ltrim_colon_completions "$cur"
     }
