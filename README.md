@@ -28,7 +28,7 @@ Installation
 Install nosecomplete from pypi:
 
 	pip install nosecomplete
-	
+
 Follow @alonhorev on twitter for updates.
 
 bash
@@ -43,8 +43,8 @@ Add the following snippet to your .bashrc:
         # or bash-version >= 4 and COMP_WORDBREAKS contains a colon
         if [[
             "$1" == *:* && (
-                ${BASH_VERSINFO[0]} -lt 4 || 
-                (${BASH_VERSINFO[0]} -ge 4 && "$COMP_WORDBREAKS" == *:*) 
+                ${BASH_VERSINFO[0]} -lt 4 ||
+                (${BASH_VERSINFO[0]} -ge 4 && "$COMP_WORDBREAKS" == *:*)
             )
         ]]; then
             # Remove colon-word prefix from COMPREPLY items
@@ -55,8 +55,8 @@ Add the following snippet to your .bashrc:
             done
         fi
     } # __ltrim_colon_completions()
-    
-    _nosetests() 
+
+    _nosetests()
     {
         cur="${COMP_WORDS[COMP_CWORD]}"
         COMPREPLY=(`nosecomplete ${cur} 2>/dev/null`)
@@ -71,11 +71,11 @@ Add the following snippet to your .zshrc:
 
     autoload -U compinit
     compinit
-    
+
     autoload -U bashcompinit
     bashcompinit
-    
-    _nosetests() 
+
+    _nosetests()
     {
         cur="${COMP_WORDS[COMP_CWORD]}"
         COMPREPLY=(`nosecomplete ${cur} 2>/dev/null`)
