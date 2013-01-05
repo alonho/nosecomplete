@@ -58,14 +58,20 @@ Add the following snippet to your .bashrc:
 
     _nosetests()
     {
-        local i=$COMP_CWORD
-        while [ $i -ge 0 ]; do
-            [ ${COMP_WORDS[$((i--))]} == ":" ] && break
-        done
-        if [ $i -le 0 ]; then
-            cur=${COMP_WORDS[COMP_CWORD]}
-        else
-            cur=$(printf "%s" ${COMP_WORDS[@]:$i})
+        cur=${COMP_WORDS[COMP_CWORD]}
+        if [[
+                ${BASH_VERSINFO[0]} -lt 4 ||
+                (${BASH_VERSINFO[0]} -ge 4 && "$COMP_WORDBREAKS" == *:*)
+        ]]; then
+            local i=$COMP_CWORD
+            while [ $i -ge 0 ]; do
+                [ ${COMP_WORDS[$((i--))]} == ":" ] && break
+            done
+            if [ $i -le 0 ]; then
+                cur=${COMP_WORDS[COMP_CWORD]}
+            else
+                cur=$(printf "%s" ${COMP_WORDS[@]:$i})
+            fi
         fi
         COMPREPLY=(`nosecomplete ${cur} 2>/dev/null`)
         __ltrim_colon_completions "$cur"
