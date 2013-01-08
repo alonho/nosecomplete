@@ -1,36 +1,36 @@
 import os
 import sys
 
-
-def _generate_tests(suite):
-    from nose.suite import ContextSuite
-    from nose.case import Test
-    for context in suite._tests:
-        if isinstance(context, Test):
-            yield context
-            continue
-        assert isinstance(context, ContextSuite)
-        for test in _generate_tests(context):
-            yield test
+from optparse import OptionParser
 
 
-def _get_test_name(test_wrapper):
-    from nose.case import FunctionTestCase
-    test = test_wrapper.test
-    if isinstance(test, FunctionTestCase):
-        return test.test.__name__
-    return test.__class__.__name__ + '.' + test._testMethodName
+class NoseTestFinder(object):
+    def _generate_tests(self, suite):
+        from nose.suite import ContextSuite
+        from nose.case import Test
+        for context in suite._tests:
+            if isinstance(context, Test):
+                yield context
+                continue
+            assert isinstance(context, ContextSuite)
+            for test in self._generate_tests(context):
+                yield test
 
+    def _get_test_name(self, test_wrapper):
+        from nose.case import FunctionTestCase
+        test = test_wrapper.test
+        if isinstance(test, FunctionTestCase):
+            return test.test.__name__
+        return test.__class__.__name__ + '.' + test._testMethodName
 
-def _generate_test_names(suite):
-    from itertools import imap
-    return imap(_get_test_name, _generate_tests(suite))
+    def _generate_test_names(self, suite):
+        from itertools import imap
+        return imap(self._get_test_name, self._generate_tests(suite))
 
-
-def get_module_tests(module):
-    import nose
-    loader = nose.loader.defaultTestLoader()
-    return _generate_test_names(loader.loadTestsFromName(module))
+    def get_module_tests(self, module):
+        import nose
+        loader = nose.loader.defaultTestLoader()
+        return self._generate_test_names(loader.loadTestsFromName(module))
 
 
 def _get_prefixed(strings, prefix):
@@ -51,10 +51,11 @@ def _get_py_or_dirs(directory, prefix):
 
 
 def _complete(thing):
+    finder = NoseTestFinder()
     if ':' in thing:
         # complete a test
         module, test_part = thing.split(':')
-        tests = list(get_module_tests(module))
+        tests = list(finder.get_module_tests(module))
         if '.' in test_part:
             # complete a method
             return _get_prefixed(strings=tests, prefix=test_part)
