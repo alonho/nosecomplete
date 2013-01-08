@@ -107,7 +107,7 @@ def _complete(test_finder, thing):
 
 
 def complete(test_finder, thing):
-    for option in _complete(test_finder, thing):
+    for option in set(_complete(test_finder, thing)):
         sys.stdout.write(thing + option + ' ')  # avoid print for python 3
 
 
