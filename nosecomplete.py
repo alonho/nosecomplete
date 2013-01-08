@@ -1,7 +1,36 @@
 import os
 import sys
+import re
+import ast
 
 from optparse import OptionParser
+
+
+class PythonTestFinder(object):
+    def find_functions(self, ast_body, matcher):
+        for obj in ast_body:
+            if not matcher(obj):
+                continue
+            if isinstance(obj, ast.FunctionDef):
+                yield obj.name
+            if isinstance(obj, ast.ClassDef):
+                for func in self.find_functions(obj.body, matcher):
+                    yield '%s.%s' % (obj.name, func)
+
+    def get_module_tests(self, module):
+        with open(module) as f:
+            data = f.read()
+        result = ast.parse(data)
+
+        def matcher(obj):
+            if isinstance(obj,
+                    ast.FunctionDef) or isinstance(obj, ast.ClassDef):
+                return re.search('test', obj.name, re.IGNORECASE)
+            return False
+        tests = list(
+            self.find_functions(result.body, matcher)
+        )
+        return tests
 
 
 class NoseTestFinder(object):
@@ -85,6 +114,7 @@ def complete(test_finder, thing):
 def main():
     methods = {
         'nose': NoseTestFinder,
+        'python': PythonTestFinder,
     }
     parser = OptionParser(usage='usage: %prog [options] ')
     parser.add_option(
