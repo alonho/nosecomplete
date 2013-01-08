@@ -50,12 +50,11 @@ def _get_py_or_dirs(directory, prefix):
                 yield leftover + ':'
 
 
-def _complete(thing):
-    finder = NoseTestFinder()
+def _complete(test_finder, thing):
     if ':' in thing:
         # complete a test
         module, test_part = thing.split(':')
-        tests = list(finder.get_module_tests(module))
+        tests = list(test_finder.get_module_tests(module))
         if '.' in test_part:
             # complete a method
             return _get_prefixed(strings=tests, prefix=test_part)
@@ -78,17 +77,28 @@ def _complete(thing):
     return _get_py_or_dirs(directory, file_part)
 
 
-def complete(thing):
-    for option in _complete(thing):
+def complete(test_finder, thing):
+    for option in _complete(test_finder, thing):
         sys.stdout.write(thing + option + ' ')  # avoid print for python 3
 
 
 def main():
-    if len(sys.argv) == 1:
-        complete('./')
-    else:
-        complete(sys.argv[1])
+    methods = {
+        'nose': NoseTestFinder,
+    }
+    parser = OptionParser(usage='usage: %prog [options] ')
+    parser.add_option(
+        "-s",
+        "--search-method",
+        help="Search method to use when locating tests",
+        choices=methods.keys(),
+        default='nose',
+    )
+    (options, args) = parser.parse_args()
+    finder_class = methods.get(options.search_method)
+    finder_instance = finder_class()
 
+    complete(finder_instance, './' if len(args) == 0 else args[0])
 
 if __name__ == '__main__':
     main()
