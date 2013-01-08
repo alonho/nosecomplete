@@ -23,10 +23,13 @@ class PythonTestFinder(object):
         result = ast.parse(data)
 
         def matcher(obj):
-            if isinstance(obj,
-                    ast.FunctionDef) or isinstance(obj, ast.ClassDef):
+            if isinstance(obj, ast.FunctionDef):
                 return re.search('test', obj.name, re.IGNORECASE)
-            return False
+            # Unlike nose, we're not able to determine whether this class
+            # inherits from unittest.TestCase
+            # So it may be the case that this class name lacks 'test'. As a
+            # compromise, match all classes
+            return isinstance(obj, ast.ClassDef)
         tests = list(
             self.find_functions(result.body, matcher)
         )
