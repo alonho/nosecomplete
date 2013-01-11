@@ -1,37 +1,75 @@
 import os
 import sys
-    
-def _generate_tests(suite):
-    from nose.suite import ContextSuite
-    from nose.case import Test
-    for context in suite._tests:
-        if isinstance(context, Test):
-            yield context
-            continue
-        assert isinstance(context, ContextSuite)
-        for test in _generate_tests(context):
-            yield test
+import re
+import ast
 
-def _get_test_name(test_wrapper):
-    from nose.case import FunctionTestCase
-    test = test_wrapper.test
-    if isinstance(test, FunctionTestCase):
-        return test.test.__name__
-    return test.__class__.__name__ + '.' + test._testMethodName
+from optparse import OptionParser
 
-def _generate_test_names(suite):
-    from itertools import imap
-    return imap(_get_test_name, _generate_tests(suite))
 
-def get_module_tests(module):
-    import nose
-    loader = nose.loader.defaultTestLoader()
-    return _generate_test_names(loader.loadTestsFromName(module))
+class PythonTestFinder(object):
+    def find_functions(self, ast_body, matcher):
+        for obj in ast_body:
+            if not matcher(obj):
+                continue
+            if isinstance(obj, ast.FunctionDef):
+                yield obj.name
+            if isinstance(obj, ast.ClassDef):
+                for func in self.find_functions(obj.body, matcher):
+                    yield '%s.%s' % (obj.name, func)
+
+    def get_module_tests(self, module):
+        with open(module) as f:
+            data = f.read()
+        result = ast.parse(data)
+
+        def matcher(obj):
+            if isinstance(obj, ast.FunctionDef):
+                return re.search('test', obj.name, re.IGNORECASE)
+            # Unlike nose, we're not able to determine whether this class
+            # inherits from unittest.TestCase
+            # So it may be the case that this class name lacks 'test'. As a
+            # compromise, match all classes
+            return isinstance(obj, ast.ClassDef)
+        tests = list(
+            self.find_functions(result.body, matcher)
+        )
+        return tests
+
+
+class NoseTestFinder(object):
+    def _generate_tests(self, suite):
+        from nose.suite import ContextSuite
+        from nose.case import Test
+        for context in suite._tests:
+            if isinstance(context, Test):
+                yield context
+                continue
+            assert isinstance(context, ContextSuite)
+            for test in self._generate_tests(context):
+                yield test
+
+    def _get_test_name(self, test_wrapper):
+        from nose.case import FunctionTestCase
+        test = test_wrapper.test
+        if isinstance(test, FunctionTestCase):
+            return test.test.__name__
+        return test.__class__.__name__ + '.' + test._testMethodName
+
+    def _generate_test_names(self, suite):
+        from itertools import imap
+        return imap(self._get_test_name, self._generate_tests(suite))
+
+    def get_module_tests(self, module):
+        import nose
+        loader = nose.loader.defaultTestLoader()
+        return self._generate_test_names(loader.loadTestsFromName(module))
+
 
 def _get_prefixed(strings, prefix):
     for string in strings:
         if string.startswith(prefix):
             yield string.replace(prefix, '', 1)
+
 
 def _get_py_or_dirs(directory, prefix):
     for entry in os.listdir(directory or '.'):
@@ -43,11 +81,12 @@ def _get_py_or_dirs(directory, prefix):
             elif leftover.endswith('.py'):
                 yield leftover + ':'
 
-def _complete(thing):
+
+def _complete(test_finder, thing):
     if ':' in thing:
         # complete a test
         module, test_part = thing.split(':')
-        tests = list(get_module_tests(module))
+        tests = list(test_finder.get_module_tests(module))
         if '.' in test_part:
             # complete a method
             return _get_prefixed(strings=tests, prefix=test_part)
@@ -69,15 +108,30 @@ def _complete(thing):
     directory, file_part = os.path.split(thing)
     return _get_py_or_dirs(directory, file_part)
 
-def complete(thing):
-    for option in _complete(thing):
-        sys.stdout.write(thing + option + ' ') # avoid print for python 3
+
+def complete(test_finder, thing):
+    for option in set(_complete(test_finder, thing)):
+        sys.stdout.write(thing + option + ' ')  # avoid print for python 3
+
 
 def main():
-    if len(sys.argv) == 1:
-        complete('./')
-    else:
-        complete(sys.argv[1])
+    methods = {
+        'nose': NoseTestFinder,
+        'python': PythonTestFinder,
+    }
+    parser = OptionParser(usage='usage: %prog [options] ')
+    parser.add_option(
+        "-s",
+        "--search-method",
+        help="Search method to use when locating tests",
+        choices=methods.keys(),
+        default='nose',
+    )
+    (options, args) = parser.parse_args()
+    finder_class = methods.get(options.search_method)
+    finder_instance = finder_class()
+
+    complete(finder_instance, './' if len(args) == 0 else args[0])
 
 if __name__ == '__main__':
     main()
