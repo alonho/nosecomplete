@@ -5,28 +5,20 @@ FIXTURES = {
     'basic': 'tests/fixtures/basic.py',
 }
 
+class _BaseTestFinderTestCase(unittest.TestCase):
 
-class NoseTestFinderTestCase(unittest.TestCase):
     def test_basic(self):
-        finder = nosecomplete.NoseTestFinder()
-        actual = list(finder.get_module_tests(FIXTURES['basic']))
+        actual = list(self.finder.get_module_tests(FIXTURES['basic']))
         expected = [
             'AwesomeTestCase.test_green',
             'AwesomeTestCase.test_yellow',
             'test_red',
             'test_blue',
         ]
-        self.assertEqual(actual, expected)
+        self.assertEqual(set(actual), set(expected))
 
-
-class PythonTestFinderTestCase(unittest.TestCase):
-    def test_basic(self):
-        finder = nosecomplete.PythonTestFinder()
-        actual = list(finder.get_module_tests(FIXTURES['basic']))
-        expected = [
-            'test_red',
-            'AwesomeTestCase.test_yellow',
-            'AwesomeTestCase.test_green',
-            'test_blue',
-        ]
-        self.assertEqual(actual, expected)
+class NoseTestFinderTestCase(_BaseTestFinderTestCase):
+    finder = nosecomplete.NoseTestFinder()
+    
+class PythonTestFinderTestCase(_BaseTestFinderTestCase):
+    finder = nosecomplete.PythonTestFinder()

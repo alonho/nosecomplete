@@ -56,8 +56,7 @@ class NoseTestFinder(object):
         return test.__class__.__name__ + '.' + test._testMethodName
 
     def _generate_test_names(self, suite):
-        from itertools import imap
-        return imap(self._get_test_name, self._generate_tests(suite))
+        return map(self._get_test_name, self._generate_tests(suite))
 
     def get_module_tests(self, module):
         import nose
@@ -128,7 +127,7 @@ def main():
         default='nose',
     )
     (options, args) = parser.parse_args()
-    finder_class = methods.get(options.search_method)
+    finder_class = methods[options.search_method]
     finder_instance = finder_class()
 
     complete(finder_instance, './' if len(args) == 0 else args[0])
