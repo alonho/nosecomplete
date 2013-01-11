@@ -124,7 +124,7 @@ def main():
         "--search-method",
         help="Search method to use when locating tests",
         choices=methods.keys(),
-        default='nose',
+        default='python',
     )
     (options, args) = parser.parse_args()
     finder_class = methods[options.search_method]
