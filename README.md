@@ -22,20 +22,17 @@ An example calling nosecomplete directly:
     utils/test_decorators.py:TestCache
 	utils/test_decorators.py:TestRetry
 
-Use python test locator
------------------------
+Test Discovery
+--------------
 
-Using `nose` for test discovery can be slow. `nosecomplete` supports an
-option to use a test discovery procedure implemented in python that
-doesn't rely on importing.
+Test discovery can be done in two ways:
+
+1. Using the discovery implemented by `nose`.
+2. Using the `python` AST module, the test module is parsed and searched for test cases without importing it. This method is fast but isn't accurate as the `nose` discovery (for example: it won't discover test cases imported by the test module).
 
 Using the `-s` option you can control which test discovery method is
-used. Two methods are available: `nose` and `python`.
-
-    % nosecomplete -s python utils/test_decorators.py:Test<ENTER>
-    utils/test_decorators.py:TestCache
-	utils/test_decorators.py:TestRetry
-
+used. The default method is `python`.
+	
 Installation
 ============
 
