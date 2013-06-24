@@ -76,7 +76,7 @@ Add the following snippet to your .bashrc:
         ]]; then
             local i=$COMP_CWORD
             while [ $i -ge 0 ]; do
-                [ ${COMP_WORDS[$((i--))]} == ":" ] && break
+                [ "${COMP_WORDS[$((i--))]}" == ":" ] && break
             done
             if [ $i -gt 0 ]; then
                 cur=$(printf "%s" ${COMP_WORDS[@]:$i})
