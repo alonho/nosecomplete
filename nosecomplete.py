@@ -123,7 +123,7 @@ def main():
         "-s",
         "--search-method",
         help="Search method to use when locating tests",
-        choices=methods.keys(),
+        choices=list(methods.keys()),
         default='python',
     )
     (options, args) = parser.parse_args()
