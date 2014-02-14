@@ -90,8 +90,18 @@ Add the following snippet to your .bashrc:
 zsh
 ---
 
-Add the following snippet to your .zshrc:
+- With [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh): add `nosetests` to plugins:
 
+    ```zsh
+    plugins=(
+        nosetests
+        pip
+        # any other plugins you want
+    )
+    ```
+- Manually: Add the following snippet to your .zshrc:
+
+    ```zsh
     autoload -U compinit
     compinit
 
@@ -104,3 +114,4 @@ Add the following snippet to your .zshrc:
         COMPREPLY=(`nosecomplete ${cur} 2>/dev/null`)
     }
     complete -o nospace -F _nosetests nosetests
+    ```
