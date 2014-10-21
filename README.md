@@ -115,3 +115,16 @@ zsh
     }
     complete -o nospace -F _nosetests nosetests
     ```
+
+fish
+----
+
+- Create a new file in `~/.config/fish/completions/nosetests.fish` with the following contents:
+
+    ```fish
+    function __fish_nosetests
+      set -l file (commandline -ot)
+      command nosecomplete $file ^/dev/null | sed -e 's/ /\n/g'
+    end
+    complete -f -c nosetests -a '(__fish_nosetests)' -d 'Nosetests'
+    ```
